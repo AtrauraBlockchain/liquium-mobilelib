@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="liquium-mobile-lib-debug.js"></script>
+    <script type="text/javascript">
+        function doVote() {
+            liquiumMobileLib.vote("0x59d3631c86bbe35ef041872d502f218a39fba150",
+                                    1,
+                                    ["0x0000000000000000000000000000000000000000000000000000000000000001"],
+                                    [web3.toWei(1)],
+                                    function(err, txHash) {
+                                        if (err) {
+                                            console.log("ERROR: "+err);
+                                        } else {
+                                            console.log("txHash:" + txHash);
+                                        }
+                                    });
+        }
+    </script>
+</head>
+<body>
+    <h1>Test Liquium Mobile Lib</h1>
+    <button onClick = "doVote()">VOTE</button>
+</body>
+</html>
