@@ -91,7 +91,7 @@ LiquiumMobileLib.prototype.addDelegate = function(organizationAddr, name, cb) {
     this.sendRawTransaction(organizationAddr, data, cb);
 };
 
-LiquiumMobileLib.prototype.vote = function(organizationAddr, idDelegate, idPoll, ballots, amounts, cb) {
+LiquiumMobileLib.prototype.dVote = function(organizationAddr, idDelegate, idPoll, ballots, amounts, cb) {
     var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
     var data = organization.dVote.getData(idDelegate, idPoll, idDelegate, ballots, amounts);
 
