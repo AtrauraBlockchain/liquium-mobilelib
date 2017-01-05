@@ -43,7 +43,7 @@ LiquiumMobileLib.prototype.sendRawTransaction = function(dest, data, cb) {
         if (result.statusCode != 200) return cb(new Error(body));
         var rawTx = {
             nonce: body.nonce,
-            gasPrice: body.price,
+            gasPrice: body.gasPrice,
             gasLimit: 500000,
             to: dest,
             value: "0x00",
