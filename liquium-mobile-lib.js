@@ -49,7 +49,8 @@ LiquiumMobileLib.prototype.sendRawTransaction = function(dest, data, cb) {
             gasLimit: 500000,
             to: dest,
             value: "0x00",
-            data: data
+            data: data,
+            chainId: 3
         };
         var tx = new Tx(rawTx);
         tx.sign(self.privKey);
