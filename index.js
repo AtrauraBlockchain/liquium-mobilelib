@@ -30,11 +30,8 @@ var LiquiumMobileLib = function() {
     }
 };
 
-LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, cb) {
-    var self = this;
+LiquiumMobileLib.prototype.sendRawTransaction = function(dest, data, cb) {
     if (!self.privKey) return cb(new Error("Key not defined"));
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.vote.getData(idPoll, ballots, amounts);
 
     request({
         url: hostApi+"/account/"+self.account,
@@ -46,7 +43,7 @@ LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, am
             nonce: body.nonce,
             gasPrice: body.price,
             gasLimit: 500000,
-            to: organizationAddr,
+            to: dest,
             value: "0x00",
             data: data
         };
@@ -66,6 +63,20 @@ LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, am
             cb(null, body.txHash);
         });
     });
+};
+
+LiquiumMobileLib.prototype.setDelegates = function(organizationAddr, categoryIds, delegates, cb) {
+    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
+    var data = organization.setDelegates.getData(categoryIds, delegates);
+
+    this.sendRawTransaction(organizationAddr, data, cb);
+};
+
+LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, cb) {
+    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
+    var data = organization.vote.getData(idPoll, ballots, amounts);
+
+    this.sendRawTransaction(organizationAddr, data, cb);
 };
 
 window.liquiumMobileLib = new LiquiumMobileLib();
