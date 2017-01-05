@@ -15,8 +15,9 @@ var organizationAbi = [{"constant":false,"inputs":[{"name":"_name","type":"strin
 
 var LiquiumMobileLib = function() {
     var self = this;
-    self.privKey = new Buffer(window.localStorage.liquiumKey, "hex");
-    if (self.privKey) {
+
+    if (window.localStorage.liquiumKey) {
+        self.privKey = new Buffer(window.localStorage.liquiumKey, "hex");
         self.account = ethUtil.toChecksumAddress(ethUtil.bufferToHex(ethUtil.privateToAddress(self.privKey)));
     } else {
         crypto.randomBytes(32, function (err, buf) {
