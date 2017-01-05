@@ -34,6 +34,7 @@ var LiquiumMobileLib = function() {
 };
 
 LiquiumMobileLib.prototype.sendRawTransaction = function(dest, data, cb) {
+    var self = this;
     if (!self.privKey) return cb(new Error("Key not defined"));
 
     request({
