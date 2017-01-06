@@ -1,6 +1,6 @@
 {
   "name": "liquium-mobilelib",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Liquium Library to use in the mobile app. Creates an account and sign the transactions.",
   "main": "index.js",
   "scripts": {

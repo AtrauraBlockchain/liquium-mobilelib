@@ -70,6 +70,15 @@ LiquiumMobileLib.prototype.sendRawTransaction = function(dest, data, cb) {
     });
 };
 
+LiquiumMobileLib.prototype.waitTx = function(txHash, cb) {
+    request({
+        url: hostApi+"/transaction/"+txHash
+    }, function(err, result, body) {
+        if (err) return cb(err);
+        if (result.statusCode != 200) return cb(new Error(body));
+        cb(null, body);
+    });
+};
 
 
 LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, cb) {
