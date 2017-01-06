@@ -1,0 +1,25 @@
+{
+  "name": "liquium-mobilelib",
+  "description": "Liquium Library to use in the mobile app. Creates an account and sign the transactions.",
+  "main": "liquium-mobilelib.js",
+  "authors": [
+    "Jordi Baylina"
+  ],
+  "license": "GPL-3.0",
+  "keywords": [
+    "Liquium",
+    "Mobile",
+    "Liquid",
+    "Democracy",
+    "Ethereum",
+    "Library"
+  ],
+  "homepage": "https://github.com/AtrauraBlockchain/liquium-mobilelib",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

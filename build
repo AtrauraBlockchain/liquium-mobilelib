@@ -1,5 +1,5 @@
 #!/bin/bash
-rm liquium-mobile-lib-debug.js
-rm liquium-mobile-lib.js
-browserify index.js -o liquium-mobile-lib-debug.js -d
-browserify index.js -o liquium-mobile-lib.js
+rm liquium-mobilelib-debug.js
+rm liquium-mobilelib.js
+browserify index.js -o liquium-mobilelib-debug.js -d
+browserify index.js -o liquium-mobilelib.js
