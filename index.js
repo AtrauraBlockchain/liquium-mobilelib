@@ -79,9 +79,9 @@ LiquiumMobileLib.prototype.waitTx = function(txHash, cb) {
 };
 
 
-LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, cb) {
+LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, motivation, cb) {
     var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.vote.getData(idPoll, ballots, amounts);
+    var data = organization.vote.getData(idPoll, ballots, amounts, motivation);
 
     this.sendRawTransaction(organizationAddr, data, cb);
 };
@@ -93,26 +93,7 @@ LiquiumMobileLib.prototype.setDelegates = function(organizationAddr, categoryIds
     this.sendRawTransaction(organizationAddr, data, cb);
 };
 
-LiquiumMobileLib.prototype.addDelegate = function(organizationAddr, name, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.addDelegate.getData(name);
 
-    this.sendRawTransaction(organizationAddr, data, cb);
-};
-
-LiquiumMobileLib.prototype.dVote = function(organizationAddr, idDelegate, idPoll, ballots, amounts, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.dVote.getData(idDelegate, idPoll, idDelegate, ballots, amounts);
-
-    this.sendRawTransaction(organizationAddr, data, cb);
-};
-
-LiquiumMobileLib.prototype.dSetDelegates = function(organizationAddr, idDelegate, categoryIds, delegates, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.dSetDelegates.getData(idDelegate, categoryIds, delegates);
-
-    this.sendRawTransaction(organizationAddr, data, cb);
-};
 
 window.liquiumMobileLib = new LiquiumMobileLib();
 window.web3 = web3;
