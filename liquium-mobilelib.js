@@ -81,9 +81,9 @@ LiquiumMobileLib.prototype.waitTx = function(txHash, cb) {
 };
 
 
-LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, cb) {
+LiquiumMobileLib.prototype.vote = function(organizationAddr, idPoll, ballots, amounts, motivation, cb) {
     var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.vote.getData(idPoll, ballots, amounts);
+    var data = organization.vote.getData(idPoll, ballots, amounts, motivation);
 
     this.sendRawTransaction(organizationAddr, data, cb);
 };
@@ -95,26 +95,18 @@ LiquiumMobileLib.prototype.setDelegates = function(organizationAddr, categoryIds
     this.sendRawTransaction(organizationAddr, data, cb);
 };
 
-LiquiumMobileLib.prototype.addDelegate = function(organizationAddr, name, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.addDelegate.getData(name);
-
-    this.sendRawTransaction(organizationAddr, data, cb);
+LiquiumMobileLib.prototype.getAllInfo = function(organizationAddr, cb) {
+    request({
+        url: hostApi+"/organization/"+organizationAddr+"?voter="+this.account
+    }, function(err, result, body) {
+        if (err) return cb(err);
+        if (result.statusCode != 200) return cb(new Error(body));
+        cb(null, body);
+    });
 };
 
-LiquiumMobileLib.prototype.dVote = function(organizationAddr, idDelegate, idPoll, ballots, amounts, motivation, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.dVote.getData(idDelegate, idPoll, idDelegate, ballots, amounts, motivation);
 
-    this.sendRawTransaction(organizationAddr, data, cb);
-};
 
-LiquiumMobileLib.prototype.dSetDelegates = function(organizationAddr, idDelegate, categoryIds, delegates, cb) {
-    var organization = web3.eth.contract(organizationAbi).at(organizationAddr);
-    var data = organization.dSetDelegates.getData(idDelegate, categoryIds, delegates);
-
-    this.sendRawTransaction(organizationAddr, data, cb);
-};
 
 window.liquiumMobileLib = new LiquiumMobileLib();
 window.web3 = web3;
@@ -1050,7 +1042,7 @@ var crypto = require('crypto')
  * Valid keys.
  */
 
-var keys =
+var keys = 
   [ 'acl'
   , 'location'
   , 'logging'
@@ -1089,7 +1081,7 @@ module.exports.authorization = authorization
  * @param {Object} options
  * @return {String}
  * @api private
- */
+ */ 
 
 function hmacSha1 (options) {
   return crypto.createHmac('sha1', options.secret).update(options.message).digest('base64')
@@ -1098,8 +1090,8 @@ function hmacSha1 (options) {
 module.exports.hmacSha1 = hmacSha1
 
 /**
- * Create a base64 sha1 HMAC for `options`.
- *
+ * Create a base64 sha1 HMAC for `options`. 
+ * 
  * @param {Object} options
  * @return {String}
  * @api private
@@ -1112,10 +1104,10 @@ function sign (options) {
 module.exports.sign = sign
 
 /**
- * Create a base64 sha1 HMAC for `options`.
+ * Create a base64 sha1 HMAC for `options`. 
  *
  * Specifically to be used with S3 presigned URLs
- *
+ * 
  * @param {Object} options
  * @return {String}
  * @api private
@@ -1131,7 +1123,7 @@ module.exports.signQuery= signQuery
  * Return a string for sign() with the given `options`.
  *
  * Spec:
- *
+ * 
  *    <verb>\n
  *    <md5>\n
  *    <content-type>\n
@@ -1147,7 +1139,7 @@ module.exports.signQuery= signQuery
 function stringToSign (options) {
   var headers = options.amazonHeaders || ''
   if (headers) headers += '\n'
-  var r =
+  var r = 
     [ options.verb
     , options.md5
     , options.contentType
@@ -1163,7 +1155,7 @@ module.exports.queryStringToSign = stringToSign
  * for S3 presigned URLs
  *
  * Spec:
- *
+ * 
  *    <date>\n
  *    <resource>
  *
@@ -15895,11 +15887,11 @@ exports.ECKey = function(curve, key, isPublic)
 //      var y = key.slice(bytes+1);
 //      this.P = new ECPointFp(curve,
 //        curve.fromBigInteger(new BigInteger(x.toString("hex"), 16)),
-//        curve.fromBigInteger(new BigInteger(y.toString("hex"), 16)));
+//        curve.fromBigInteger(new BigInteger(y.toString("hex"), 16)));      
       this.P = curve.decodePointHex(key.toString("hex"));
     }else{
       if(key.length != bytes) return false;
-      priv = new BigInteger(key.toString("hex"), 16);
+      priv = new BigInteger(key.toString("hex"), 16);      
     }
   }else{
     var n1 = n.subtract(BigInteger.ONE);
@@ -15921,7 +15913,7 @@ exports.ECKey = function(curve, key, isPublic)
       if(!key || !key.P) return false;
       var S = key.P.multiply(priv);
       return new Buffer(unstupid(S.getX().toBigInteger().toString(16),bytes*2),"hex");
-   }
+   }     
   }
 }
 
@@ -16364,7 +16356,7 @@ ECFieldElementFp.prototype.modReduce = function(x)
             {
                 u = u.multiply(this.getR());
             }
-            x = u.add(v);
+            x = u.add(v); 
         }
         while (x.compareTo(q) >= 0)
         {
@@ -22281,8 +22273,8 @@ var util = require('util')
   , net = require('net')
   , tls = require('tls')
   , AgentSSL = require('https').Agent
-
-function getConnectionName(host, port) {
+  
+function getConnectionName(host, port) {  
   var name = ''
   if (typeof host === 'string') {
     name = host + ':' + port
@@ -22291,7 +22283,7 @@ function getConnectionName(host, port) {
     name = host.host + ':' + host.port + ':' + (host.localAddress ? (host.localAddress + ':') : ':')
   }
   return name
-}
+}    
 
 function ForeverAgent(options) {
   var self = this
@@ -22309,7 +22301,7 @@ function ForeverAgent(options) {
     } else if (self.sockets[name].length < self.minSockets) {
       if (!self.freeSockets[name]) self.freeSockets[name] = []
       self.freeSockets[name].push(socket)
-
+      
       // if an error happens while we don't use the socket anyway, meh, throw the socket away
       var onIdleError = function() {
         socket.destroy()
@@ -22335,7 +22327,7 @@ ForeverAgent.prototype.createConnection = net.createConnection
 ForeverAgent.prototype.addRequestNoreuse = Agent.prototype.addRequest
 ForeverAgent.prototype.addRequest = function(req, host, port) {
   var name = getConnectionName(host, port)
-
+  
   if (typeof host !== 'string') {
     var options = host
     port = options.port
@@ -22364,7 +22356,7 @@ ForeverAgent.prototype.removeSocket = function(s, name, host, port) {
     delete this.sockets[name]
     delete this.requests[name]
   }
-
+  
   if (this.freeSockets[name]) {
     var index = this.freeSockets[name].indexOf(s)
     if (index !== -1) {
@@ -26563,9 +26555,9 @@ module.exports.isDuplex   = isDuplex
 /*
  * Copyright (c) 2014 Mega Limited
  * under the MIT License.
- *
+ * 
  * Authors: Guy K. Kloss
- *
+ * 
  * You should have received a copy of the license along with this program.
  */
 
@@ -26573,7 +26565,7 @@ var dh = require('./lib/dh');
 var eddsa = require('./lib/eddsa');
 var curve255 = require('./lib/curve255');
 var utils = require('./lib/utils');
-
+    
     /**
      * @exports jodid25519
      * Curve 25519-based cryptography collection.
@@ -26583,7 +26575,7 @@ var utils = require('./lib/utils');
      * (EdDSA) based on Ed25519.
      */
     var ns = {};
-
+    
     /** Module version indicator as string (format: [major.minor.patch]). */
     ns.VERSION = '0.7.1';
 
@@ -28219,8 +28211,8 @@ module.exports = ns;
   var PADDING = [6, 1536, 393216, 100663296];
   var SHIFT = [0, 8, 16, 24];
   var RC = [1, 0, 32898, 0, 32906, 2147483648, 2147516416, 2147483648, 32907, 0, 2147483649,
-            0, 2147516545, 2147483648, 32777, 2147483648, 138, 0, 136, 0, 2147516425, 0,
-            2147483658, 0, 2147516555, 0, 139, 2147483648, 32905, 2147483648, 32771,
+            0, 2147516545, 2147483648, 32777, 2147483648, 138, 0, 136, 0, 2147516425, 0, 
+            2147483658, 0, 2147516555, 0, 139, 2147483648, 32905, 2147483648, 32771, 
             2147483648, 32770, 2147483648, 128, 2147483648, 32778, 0, 2147483658, 2147483648,
             2147516545, 2147483648, 32896, 2147483648, 2147483649, 0, 2147516424, 2147483648];
 
@@ -28266,9 +28258,9 @@ module.exports = ns;
     }
 
     var block, code, end = false, index = 0, start = 0, length = message.length,
-        n, i, h, l, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9,
-        b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17,
-        b18, b19, b20, b21, b22, b23, b24, b25, b26, b27, b28, b29, b30, b31, b32, b33,
+        n, i, h, l, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, 
+        b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, 
+        b18, b19, b20, b21, b22, b23, b24, b25, b26, b27, b28, b29, b30, b31, b32, b33, 
         b34, b35, b36, b37, b38, b39, b40, b41, b42, b43, b44, b45, b46, b47, b48, b49;
     var blockCount = (1600 - bits * 2) / 32;
     var byteCount = blockCount * 4;
@@ -28603,7 +28595,7 @@ module.exports = ns;
     }
     return hex;
   };
-
+  
   if(!root.JS_SHA3_TEST && NODE_JS) {
     module.exports = {
       sha3_512: sha3_512,
@@ -30198,8 +30190,8 @@ var validate = exports._validate = function(/*Any*/instance,/*Object*/schema,/*O
 			if(typeof instance != 'object' || instance instanceof Array){
 				errors.push({property:path,message:"an object is required"});
 			}
-
-			for(var i in objTypeDef){
+			
+			for(var i in objTypeDef){ 
 				if(objTypeDef.hasOwnProperty(i)){
 					var value = instance[i];
 					// skip _not_ specified properties
@@ -37845,7 +37837,7 @@ function compare (a, b) {
 }
 
 function generateBase (httpMethod, base_uri, params) {
-  // adapted from https://dev.twitter.com/docs/auth/oauth and
+  // adapted from https://dev.twitter.com/docs/auth/oauth and 
   // https://dev.twitter.com/docs/auth/creating-signature
 
   // Parameter normalization
@@ -51222,7 +51214,7 @@ TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
   var placeholder = {}
   self.sockets.push(placeholder)
 
-  var connectOptions = mergeOptions({}, self.proxyOptions,
+  var connectOptions = mergeOptions({}, self.proxyOptions, 
     { method: 'CONNECT'
     , path: options.host + ':' + options.port
     , agent: false
@@ -51287,7 +51279,7 @@ TunnelingAgent.prototype.createSocket = function createSocket(options, cb) {
 TunnelingAgent.prototype.removeSocket = function removeSocket(socket) {
   var pos = this.sockets.indexOf(socket)
   if (pos === -1) return
-
+  
   this.sockets.splice(pos, 1)
 
   var pending = this.requests.shift()
@@ -51302,7 +51294,7 @@ function createSecureSocket(options, cb) {
   var self = this
   TunnelingAgent.prototype.createSocket.call(self, options, function(socket) {
     // 0 is dummy port for v0.6
-    var secureSocket = tls.connect(0, mergeOptions({}, self.options,
+    var secureSocket = tls.connect(0, mergeOptions({}, self.options, 
       { servername: options.host
       , socket: socket
       }
@@ -54998,7 +54990,7 @@ module.exports = SolidityTypeBytes;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file coder.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -55028,7 +55020,7 @@ var SolidityCoder = function (types) {
  *
  * @method _requireType
  * @param {String} type
- * @returns {SolidityType}
+ * @returns {SolidityType} 
  * @throws {Error} throws if no matching type is found
  */
 SolidityCoder.prototype._requireType = function (type) {
@@ -55076,7 +55068,7 @@ SolidityCoder.prototype.encodeParams = function (types, params) {
         return acc + roundedStaticPartLength;
     }, 0);
 
-    var result = this.encodeMultiWithOffset(types, solidityTypes, encodeds, dynamicOffset);
+    var result = this.encodeMultiWithOffset(types, solidityTypes, encodeds, dynamicOffset); 
 
     return result;
 };
@@ -55101,7 +55093,7 @@ SolidityCoder.prototype.encodeMultiWithOffset = function (types, solidityTypes, 
 
         // TODO: figure out nested arrays
     });
-
+    
     types.forEach(function (type, i) {
         if (isDynamic(i)) {
             var e = self.encodeWithOffset(types[i], solidityTypes[i], encodeds[i], dynamicOffset);
@@ -55121,7 +55113,7 @@ SolidityCoder.prototype.encodeWithOffset = function (type, solidityType, encoded
             var nestedName = solidityType.nestedName(type);
             var nestedStaticPartLength = solidityType.staticPartLength(nestedName);
             var result = encoded[0];
-
+            
             (function () {
                 var previousLength = 2; // in int
                 if (solidityType.isDynamicArray(nestedName)) {
@@ -55131,7 +55123,7 @@ SolidityCoder.prototype.encodeWithOffset = function (type, solidityType, encoded
                     }
                 }
             })();
-
+            
             // first element is length, skip it
             (function () {
                 for (var i = 0; i < encoded.length - 1; i++) {
@@ -55142,7 +55134,7 @@ SolidityCoder.prototype.encodeWithOffset = function (type, solidityType, encoded
 
             return result;
         })();
-
+       
     } else if (solidityType.isStaticArray(type)) {
         return (function () {
             var nestedName = solidityType.nestedName(type);
@@ -55155,7 +55147,7 @@ SolidityCoder.prototype.encodeWithOffset = function (type, solidityType, encoded
                     var previousLength = 0; // in int
                     for (var i = 0; i < encoded.length; i++) {
                         // calculate length of previous item
-                        previousLength += +(encoded[i - 1] || [])[0] || 0;
+                        previousLength += +(encoded[i - 1] || [])[0] || 0; 
                         result += f.formatInputInt(offset + i * nestedStaticPartLength + previousLength * 32).encode();
                     }
                 })();
@@ -55198,7 +55190,7 @@ SolidityCoder.prototype.decodeParam = function (type, bytes) {
 SolidityCoder.prototype.decodeParams = function (types, bytes) {
     var solidityTypes = this.getSolidityTypes(types);
     var offsets = this.getOffsets(types, solidityTypes);
-
+        
     return solidityTypes.map(function (solidityType, index) {
         return solidityType.decode(bytes, offsets[index],  types[index], index);
     });
@@ -55208,16 +55200,16 @@ SolidityCoder.prototype.getOffsets = function (types, solidityTypes) {
     var lengths =  solidityTypes.map(function (solidityType, index) {
         return solidityType.staticPartLength(types[index]);
     });
-
+    
     for (var i = 1; i < lengths.length; i++) {
          // sum with length of previous element
-        lengths[i] += lengths[i - 1];
+        lengths[i] += lengths[i - 1]; 
     }
 
     return lengths.map(function (length, index) {
         // remove the current length, so the length is sum of previous elements
         var staticPartLength = solidityTypes[index].staticPartLength(types[index]);
-        return length - staticPartLength;
+        return length - staticPartLength; 
     });
 };
 
@@ -55287,7 +55279,7 @@ module.exports = SolidityTypeDynamicBytes;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file formatters.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -55431,7 +55423,7 @@ var formatOutputUInt = function (param) {
  * @returns {BigNumber} input bytes formatted to real
  */
 var formatOutputReal = function (param) {
-    return formatOutputInt(param).dividedBy(new BigNumber(2).pow(128));
+    return formatOutputInt(param).dividedBy(new BigNumber(2).pow(128)); 
 };
 
 /**
@@ -55442,7 +55434,7 @@ var formatOutputReal = function (param) {
  * @returns {BigNumber} input bytes formatted to ureal
  */
 var formatOutputUReal = function (param) {
-    return formatOutputUInt(param).dividedBy(new BigNumber(2).pow(128));
+    return formatOutputUInt(param).dividedBy(new BigNumber(2).pow(128)); 
 };
 
 /**
@@ -55577,7 +55569,7 @@ module.exports = SolidityTypeInt;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file param.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -55596,7 +55588,7 @@ var SolidityParam = function (value, offset) {
 
 /**
  * This method should be used to get length of params's dynamic part
- *
+ * 
  * @method dynamicPartLength
  * @returns {Number} length of dynamic part (in bytes)
  */
@@ -55624,7 +55616,7 @@ SolidityParam.prototype.withOffset = function (offset) {
  * @param {SolidityParam} result of combination
  */
 SolidityParam.prototype.combine = function (param) {
-    return new SolidityParam(this.value + param.value);
+    return new SolidityParam(this.value + param.value); 
 };
 
 /**
@@ -55656,8 +55648,8 @@ SolidityParam.prototype.offsetAsBytes = function () {
  */
 SolidityParam.prototype.staticPart = function () {
     if (!this.isDynamic()) {
-        return this.value;
-    }
+        return this.value; 
+    } 
     return this.offsetAsBytes();
 };
 
@@ -55689,7 +55681,7 @@ SolidityParam.prototype.encode = function () {
  * @returns {String}
  */
 SolidityParam.encodeList = function (params) {
-
+    
     // updating offsets
     var totalOffset = params.length * 32;
     var offsetParams = params.map(function (param) {
@@ -55815,13 +55807,13 @@ SolidityType.prototype.staticPartLength = function (name) {
 
 /**
  * Should be used to determine if type is dynamic array
- * eg:
+ * eg: 
  * "type[]" => true
  * "type[4]" => false
  *
  * @method isDynamicArray
  * @param {String} name
- * @return {Bool} true if the type is dynamic array
+ * @return {Bool} true if the type is dynamic array 
  */
 SolidityType.prototype.isDynamicArray = function (name) {
     var nestedTypes = this.nestedTypes(name);
@@ -55830,13 +55822,13 @@ SolidityType.prototype.isDynamicArray = function (name) {
 
 /**
  * Should be used to determine if type is static array
- * eg:
+ * eg: 
  * "type[]" => false
  * "type[4]" => true
  *
  * @method isStaticArray
  * @param {String} name
- * @return {Bool} true if the type is static array
+ * @return {Bool} true if the type is static array 
  */
 SolidityType.prototype.isStaticArray = function (name) {
     var nestedTypes = this.nestedTypes(name);
@@ -55845,7 +55837,7 @@ SolidityType.prototype.isStaticArray = function (name) {
 
 /**
  * Should return length of static array
- * eg.
+ * eg. 
  * "int[32]" => 32
  * "int256[14]" => 14
  * "int[2][3]" => 3
@@ -55920,7 +55912,7 @@ SolidityType.prototype.nestedTypes = function (name) {
  * Should be used to encode the value
  *
  * @method encode
- * @param {Object} value
+ * @param {Object} value 
  * @param {String} name
  * @return {String} encoded value
  */
@@ -55934,7 +55926,7 @@ SolidityType.prototype.encode = function (value, name) {
 
             var result = [];
             result.push(f.formatInputInt(length).encode());
-
+            
             value.forEach(function (v) {
                 result.push(self.encode(v, nestedName));
             });
@@ -56010,12 +56002,12 @@ SolidityType.prototype.decode = function (bytes, offset, name) {
             return result;
         })();
     } else if (this.isDynamicType(name)) {
-
+        
         return (function () {
             var dynamicOffset = parseInt('0x' + bytes.substr(offset * 2, 64));      // in bytes
             var length = parseInt('0x' + bytes.substr(dynamicOffset * 2, 64));      // in bytes
             var roundedLength = Math.floor((length + 31) / 32);                     // in int
-
+        
             return self._outputFormatter(new SolidityParam(bytes.substr(dynamicOffset * 2, ( 1 + roundedLength) * 64), 0));
         })();
     }
@@ -56138,13 +56130,13 @@ if (typeof XMLHttpRequest === 'undefined') {
 
 /**
  * Utils
- *
+ * 
  * @module utils
  */
 
 /**
  * Utility functions
- *
+ * 
  * @class [utils] config
  * @constructor
  */
@@ -56211,7 +56203,7 @@ module.exports = {
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file sha3.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -56276,7 +56268,7 @@ var sha3 = require('./sha3.js');
 var utf8 = require('utf8');
 
 var unitMap = {
-    'noether':      '0',
+    'noether':      '0',    
     'wei':          '1',
     'kwei':         '1000',
     'Kwei':         '1000',
@@ -56659,18 +56651,18 @@ var isAddress = function (address) {
  * @param {String} address the given HEX adress
  * @return {Boolean}
 */
-var isChecksumAddress = function (address) {
+var isChecksumAddress = function (address) {    
     // Check each case
     address = address.replace('0x','');
     var addressHash = sha3(address.toLowerCase());
 
-    for (var i = 0; i < 40; i++ ) {
+    for (var i = 0; i < 40; i++ ) { 
         // the nth letter should be uppercase if the nth digit of casemap is 1
         if ((parseInt(addressHash[i], 16) > 7 && address[i].toUpperCase() !== address[i]) || (parseInt(addressHash[i], 16) <= 7 && address[i].toLowerCase() !== address[i])) {
             return false;
         }
     }
-    return true;
+    return true;    
 };
 
 
@@ -56682,15 +56674,15 @@ var isChecksumAddress = function (address) {
  * @param {String} address the given HEX adress
  * @return {String}
 */
-var toChecksumAddress = function (address) {
+var toChecksumAddress = function (address) { 
     if (typeof address === 'undefined') return '';
 
     address = address.toLowerCase().replace('0x','');
     var addressHash = sha3(address);
     var checksumAddress = '0x';
 
-    for (var i = 0; i < address.length; i++ ) {
-        // If ith character is 9 to f then make it uppercase
+    for (var i = 0; i < address.length; i++ ) { 
+        // If ith character is 9 to f then make it uppercase 
         if (parseInt(addressHash[i], 16) > 7) {
           checksumAddress += address[i].toUpperCase();
         } else {
@@ -57005,7 +56997,7 @@ module.exports = Web3;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file allevents.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2014
@@ -57095,7 +57087,7 @@ module.exports = AllSolidityEvents;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file batch.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -57140,7 +57132,7 @@ Batch.prototype.execute = function () {
                 requests[index].callback(null, (requests[index].format ? requests[index].format(result.result) : result.result));
             }
         });
-    });
+    }); 
 };
 
 module.exports = Batch;
@@ -57463,7 +57455,7 @@ module.exports = ContractFactory;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file errors.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -57503,7 +57495,7 @@ module.exports = {
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file event.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2014
@@ -57574,7 +57566,7 @@ SolidityEvent.prototype.signature = function () {
 
 /**
  * Should be used to encode indexed params and options to one final object
- *
+ * 
  * @method encode
  * @param {Object} indexed
  * @param {Object} options
@@ -57605,7 +57597,7 @@ SolidityEvent.prototype.encode = function (indexed, options) {
         if (value === undefined || value === null) {
             return null;
         }
-
+        
         if (utils.isArray(value)) {
             return value.map(function (v) {
                 return '0x' + coder.encodeParam(i.type, v);
@@ -57627,17 +57619,17 @@ SolidityEvent.prototype.encode = function (indexed, options) {
  * @return {Object} result object with decoded indexed && not indexed params
  */
 SolidityEvent.prototype.decode = function (data) {
-
+ 
     data.data = data.data || '';
     data.topics = data.topics || [];
 
     var argTopics = this._anonymous ? data.topics : data.topics.slice(1);
     var indexedData = argTopics.map(function (topics) { return topics.slice(2); }).join("");
-    var indexedParams = coder.decodeParams(this.types(true), indexedData);
+    var indexedParams = coder.decodeParams(this.types(true), indexedData); 
 
     var notIndexedData = data.data.slice(2);
     var notIndexedParams = coder.decodeParams(this.types(false), notIndexedData);
-
+    
     var result = formatters.outputLogFormatter(data);
     result.event = this.displayName();
     result.address = data.address;
@@ -57672,7 +57664,7 @@ SolidityEvent.prototype.execute = function (indexed, options, callback) {
             indexed = {};
         }
     }
-
+    
     var o = this.encode(indexed, options);
     var formatter = this.decode.bind(this);
     return new Filter(this._requestManager, o, watches.eth(), formatter, callback);
@@ -57733,7 +57725,7 @@ var extend = function (web3) {
         }
     };
 
-    ex.formatters = formatters;
+    ex.formatters = formatters; 
     ex.utils = utils;
     ex.Method = Method;
     ex.Property = Property;
@@ -58401,8 +58393,8 @@ SolidityFunction.prototype.call = function () {
     if (!callback) {
         var output = this._eth.call(payload, defaultBlock);
         return this.unpackOutput(output);
-    }
-
+    } 
+        
     var self = this;
     this._eth.call(payload, defaultBlock, function (error, output) {
         callback(error, self.unpackOutput(output));
@@ -58487,11 +58479,11 @@ SolidityFunction.prototype.request = function () {
     var callback = this.extractCallback(args);
     var payload = this.toPayload(args);
     var format = this.unpackOutput.bind(this);
-
+    
     return {
         method: this._constant ? 'eth_call' : 'eth_sendTransaction',
         callback: callback,
-        params: [payload],
+        params: [payload], 
         format: format
     };
 };
@@ -58619,7 +58611,7 @@ HttpProvider.prototype.send = function (payload) {
     try {
         result = JSON.parse(result);
     } catch(e) {
-        throw errors.InvalidResponse(request.responseText);
+        throw errors.InvalidResponse(request.responseText);                
     }
 
     return result;
@@ -58633,7 +58625,7 @@ HttpProvider.prototype.send = function (payload) {
  * @param {Function} callback triggered on end with (err, result)
  */
 HttpProvider.prototype.sendAsync = function (payload, callback) {
-    var request = this.prepareRequest(true);
+    var request = this.prepareRequest(true); 
 
     request.onreadystatechange = function() {
         if (request.readyState === 4) {
@@ -58643,13 +58635,13 @@ HttpProvider.prototype.sendAsync = function (payload, callback) {
             try {
                 result = JSON.parse(result);
             } catch(e) {
-                error = errors.InvalidResponse(request.responseText);
+                error = errors.InvalidResponse(request.responseText);                
             }
 
             callback(error, result);
         }
     };
-
+    
     try {
         request.send(JSON.stringify(payload));
     } catch(error) {
@@ -58697,7 +58689,7 @@ module.exports = HttpProvider;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file iban.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -58897,7 +58889,7 @@ Iban.prototype.address = function () {
         var base36 = this._iban.substr(4);
         var asBn = new BigNumber(base36, 36);
         return padLeft(asBn.toString(16), 20);
-    }
+    } 
 
     return '';
 };
@@ -58942,7 +58934,7 @@ var IpcProvider = function (path, net) {
     var _this = this;
     this.responseCallbacks = {};
     this.path = path;
-
+    
     this.connection = net.connect({path: this.path});
 
     this.connection.on('error', function(e){
@@ -58952,7 +58944,7 @@ var IpcProvider = function (path, net) {
 
     this.connection.on('end', function(){
         _this._timeout();
-    });
+    }); 
 
 
     // LISTEN FOR CONNECTION RESPONSES
@@ -58991,7 +58983,7 @@ Will parse the response and make an array out of it.
 IpcProvider.prototype._parseResponse = function(data) {
     var _this = this,
         returnValues = [];
-
+    
     // DE-CHUNKER
     var dechunkedData = data
         .replace(/\}[\n\r]?\{/g,'}|--|{') // }{
@@ -59095,7 +59087,7 @@ IpcProvider.prototype.send = function (payload) {
         try {
             result = JSON.parse(data);
         } catch(e) {
-            throw errors.InvalidResponse(data);
+            throw errors.InvalidResponse(data);                
         }
 
         return result;
@@ -59270,7 +59262,7 @@ Method.prototype.extractCallback = function (args) {
 
 /**
  * Should be called to check if the number of arguments is correct
- *
+ * 
  * @method validateArgs
  * @param {Array} arguments
  * @throws {Error} if it is not
@@ -59283,7 +59275,7 @@ Method.prototype.validateArgs = function (args) {
 
 /**
  * Should be called to format input args of method
- *
+ * 
  * @method formatInput
  * @param {Array}
  * @return {Array}
@@ -59337,7 +59329,7 @@ Method.prototype.attachToObject = function (obj) {
         obj[name[0]] = obj[name[0]] || {};
         obj[name[0]][name[1]] = func;
     } else {
-        obj[name[0]] = func;
+        obj[name[0]] = func; 
     }
 };
 
@@ -59401,8 +59393,8 @@ var DB = function (web3) {
     this._requestManager = web3._requestManager;
 
     var self = this;
-
-    methods().forEach(function(method) {
+    
+    methods().forEach(function(method) { 
         method.attachToObject(self);
         method.setRequestManager(web3._requestManager);
     });
@@ -59504,12 +59496,12 @@ function Eth(web3) {
 
     var self = this;
 
-    methods().forEach(function(method) {
+    methods().forEach(function(method) { 
         method.attachToObject(self);
         method.setRequestManager(self._requestManager);
     });
 
-    properties().forEach(function(p) {
+    properties().forEach(function(p) { 
         p.attachToObject(self);
         p.setRequestManager(self._requestManager);
     });
@@ -59820,7 +59812,7 @@ var Net = function (web3) {
 
     var self = this;
 
-    properties().forEach(function(p) {
+    properties().forEach(function(p) { 
         p.attachToObject(self);
         p.setRequestManager(web3._requestManager);
     });
@@ -59971,7 +59963,7 @@ var Shh = function (web3) {
 
     var self = this;
 
-    methods().forEach(function(method) {
+    methods().forEach(function(method) { 
         method.attachToObject(self);
         method.setRequestManager(self._requestManager);
     });
@@ -59981,11 +59973,11 @@ Shh.prototype.filter = function (fil, callback) {
     return new Filter(this._requestManager, fil, watches.shh(), formatters.outputPostFormatter, callback);
 };
 
-var methods = function () {
+var methods = function () { 
 
     var post = new Method({
-        name: 'post',
-        call: 'shh_post',
+        name: 'post', 
+        call: 'shh_post', 
         params: 1,
         inputFormatter: [formatters.inputPostFormatter]
     });
@@ -60159,7 +60151,7 @@ module.exports = {
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file namereg.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -60224,7 +60216,7 @@ Property.prototype.setRequestManager = function (rm) {
 
 /**
  * Should be called to format input args of method
- *
+ * 
  * @method formatInput
  * @param {Array}
  * @return {Array}
@@ -60260,7 +60252,7 @@ Property.prototype.extractCallback = function (args) {
 
 /**
  * Should attach function to method
- *
+ * 
  * @method attachToObject
  * @param {Object}
  * @param {Function}
@@ -60268,7 +60260,7 @@ Property.prototype.extractCallback = function (args) {
 Property.prototype.attachToObject = function (obj) {
     var proto = {
         get: this.buildGet(),
-        enumerable: true
+        enumerable: true 
     };
 
     var names = this.name.split('.');
@@ -60292,7 +60284,7 @@ Property.prototype.buildGet = function () {
     return function get() {
         return property.formatOutput(property.requestManager.send({
             method: property.getter
-        }));
+        })); 
     };
 };
 
@@ -60346,7 +60338,7 @@ module.exports = Property;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file requestmanager.js
  * @author Jeffrey Wilcke <jeff@ethdev.com>
  * @author Marek Kotewicz <marek@ethdev.com>
@@ -60413,7 +60405,7 @@ RequestManager.prototype.sendAsync = function (data, callback) {
         if (err) {
             return callback(err);
         }
-
+        
         if (!Jsonrpc.isValidResponse(result)) {
             return callback(errors.InvalidResponse(result));
         }
@@ -60446,7 +60438,7 @@ RequestManager.prototype.sendBatch = function (data, callback) {
         }
 
         callback(err, results);
-    });
+    }); 
 };
 
 /**
@@ -60550,7 +60542,7 @@ RequestManager.prototype.poll = function () {
     }
 
     var payload = Jsonrpc.toBatchPayload(pollsData);
-
+    
     // map the request id to they poll id
     var pollsIdMap = {};
     payload.forEach(function(load, index){
@@ -60580,7 +60572,7 @@ RequestManager.prototype.poll = function () {
             } else
                 return false;
         }).filter(function (result) {
-            return !!result;
+            return !!result; 
         }).filter(function (result) {
             var valid = Jsonrpc.isValidResponse(result);
             if (!valid) {
@@ -60655,16 +60647,16 @@ var pollSyncing = function(self) {
 
         self.callbacks.forEach(function (callback) {
             if (self.lastSyncState !== sync) {
-
+                
                 // call the callback with true first so the app can stop anything, before receiving the sync data
                 if(!self.lastSyncState && utils.isObject(sync))
                     callback(null, true);
-
+                
                 // call on the next CPU cycle, so the actions of the sync stop can be processes first
                 setTimeout(function() {
                     callback(null, sync);
                 }, 0);
-
+                
                 self.lastSyncState = sync;
             }
         });
@@ -60719,7 +60711,7 @@ module.exports = IsSyncing;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/**
+/** 
  * @file transfer.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -60738,7 +60730,7 @@ var exchangeAbi = require('../contracts/SmartExchange.json');
  * @param {Function} callback, callback
  */
 var transfer = function (eth, from, to, value, callback) {
-    var iban = new Iban(to);
+    var iban = new Iban(to); 
     if (!iban.isValid()) {
         throw new Error('invalid iban address');
     }
@@ -60746,7 +60738,7 @@ var transfer = function (eth, from, to, value, callback) {
     if (iban.isDirect()) {
         return transferToAddress(eth, from, iban.address(), value, callback);
     }
-
+    
     if (!callback) {
         var address = eth.icapNamereg().addr(iban.institution());
         return deposit(eth, from, address, value, iban.client());
@@ -60755,7 +60747,7 @@ var transfer = function (eth, from, to, value, callback) {
     eth.icapNamereg().addr(iban.institution(), function (err, address) {
         return deposit(eth, from, address, value, iban.client(), callback);
     });
-
+    
 };
 
 /**
@@ -64788,7 +64780,7 @@ exports.UNZIP = 7;
 function Zlib(mode) {
   if (mode < exports.DEFLATE || mode > exports.UNZIP)
     throw new TypeError("Bad argument");
-
+    
   this.mode = mode;
   this.init_done = false;
   this.write_in_progress = false;
@@ -64806,18 +64798,18 @@ Zlib.prototype.init = function(windowBits, level, memLevel, strategy, dictionary
   this.memLevel = memLevel;
   this.strategy = strategy;
   // dictionary not supported.
-
+  
   if (this.mode === exports.GZIP || this.mode === exports.GUNZIP)
     this.windowBits += 16;
-
+    
   if (this.mode === exports.UNZIP)
     this.windowBits += 32;
-
+    
   if (this.mode === exports.DEFLATERAW || this.mode === exports.INFLATERAW)
     this.windowBits = -this.windowBits;
-
+    
   this.strm = new zstream();
-
+  
   switch (this.mode) {
     case exports.DEFLATE:
     case exports.GZIP:
@@ -64843,12 +64835,12 @@ Zlib.prototype.init = function(windowBits, level, memLevel, strategy, dictionary
     default:
       throw new Error("Unknown mode " + this.mode);
   }
-
+  
   if (status !== exports.Z_OK) {
     this._error(status);
     return;
   }
-
+  
   this.write_in_progress = false;
   this.init_done = true;
 };
@@ -64860,31 +64852,31 @@ Zlib.prototype.params = function() {
 Zlib.prototype._writeCheck = function() {
   if (!this.init_done)
     throw new Error("write before init");
-
+    
   if (this.mode === exports.NONE)
     throw new Error("already finalized");
-
+    
   if (this.write_in_progress)
     throw new Error("write already in progress");
-
+    
   if (this.pending_close)
     throw new Error("close is pending");
 };
 
-Zlib.prototype.write = function(flush, input, in_off, in_len, out, out_off, out_len) {
+Zlib.prototype.write = function(flush, input, in_off, in_len, out, out_off, out_len) {    
   this._writeCheck();
   this.write_in_progress = true;
-
+  
   var self = this;
   process.nextTick(function() {
     self.write_in_progress = false;
     var res = self._write(flush, input, in_off, in_len, out, out_off, out_len);
     self.callback(res[0], res[1]);
-
+    
     if (self.pending_close)
       self.close();
   });
-
+  
   return this;
 };
 
@@ -64902,7 +64894,7 @@ Zlib.prototype.writeSync = function(flush, input, in_off, in_len, out, out_off, 
 
 Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out_len) {
   this.write_in_progress = true;
-
+  
   if (flush !== exports.Z_NO_FLUSH &&
       flush !== exports.Z_PARTIAL_FLUSH &&
       flush !== exports.Z_SYNC_FLUSH &&
@@ -64911,18 +64903,18 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
       flush !== exports.Z_BLOCK) {
     throw new Error("Invalid flush value");
   }
-
+  
   if (input == null) {
     input = new Buffer(0);
     in_len = 0;
     in_off = 0;
   }
-
+  
   if (out._set)
     out.set = out._set;
   else
     out.set = bufferSet;
-
+  
   var strm = this.strm;
   strm.avail_in = in_len;
   strm.input = input;
@@ -64930,7 +64922,7 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
   strm.avail_out = out_len;
   strm.output = out;
   strm.next_out = out_off;
-
+  
   switch (this.mode) {
     case exports.DEFLATE:
     case exports.GZIP:
@@ -64946,11 +64938,11 @@ Zlib.prototype._write = function(flush, input, in_off, in_len, out, out_off, out
     default:
       throw new Error("Unknown mode " + this.mode);
   }
-
+  
   if (status !== exports.Z_STREAM_END && status !== exports.Z_OK) {
     this._error(status);
   }
-
+  
   this.write_in_progress = false;
   return [strm.avail_in, strm.avail_out];
 };
@@ -64960,15 +64952,15 @@ Zlib.prototype.close = function() {
     this.pending_close = true;
     return;
   }
-
+  
   this.pending_close = false;
-
+  
   if (this.mode === exports.DEFLATE || this.mode === exports.GZIP || this.mode === exports.DEFLATERAW) {
     zlib_deflate.deflateEnd(this.strm);
   } else {
     zlib_inflate.inflateEnd(this.strm);
   }
-
+  
   this.mode = exports.NONE;
 };
 
@@ -64983,7 +64975,7 @@ Zlib.prototype.reset = function() {
       var status = zlib_inflate.inflateReset(this.strm);
       break;
   }
-
+  
   if (status !== exports.Z_OK) {
     this._error(status);
   }
@@ -64991,7 +64983,7 @@ Zlib.prototype.reset = function() {
 
 Zlib.prototype._error = function(status) {
   this.onerror(msg[status] + ': ' + this.strm.msg, status);
-
+  
   this.write_in_progress = false;
   if (this.pending_close)
     this.close();
@@ -76249,7 +76241,7 @@ module.exports = function privateDecrypt(private_key, enc, reverse) {
   } else {
     padding = 4;
   }
-
+  
   var key = parseKeys(private_key);
   var k = key.modulus.byteLength();
   if (enc.length > k || new bn(enc).cmp(key.modulus) >= 0) {
@@ -79699,7 +79691,7 @@ var IncomingMessage = exports.IncomingMessage = function (xhr, response, mode) {
 		self.url = response.url
 		self.statusCode = response.status
 		self.statusMessage = response.statusText
-
+		
 		response.headers.forEach(function(header, key){
 			self.headers[key.toLowerCase()] = header
 			self.rawHeaders.push(key, header)
@@ -79785,7 +79777,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 				self.push(new Buffer(response))
 				break
 			}
-			// Falls through in IE8
+			// Falls through in IE8	
 		case 'text':
 			try { // This will fail when readyState = 3 in IE9. Switch mode and wait for readyState = 4
 				response = xhr.responseText
@@ -81574,13 +81566,13 @@ Script.prototype.runInContext = function (context) {
     if (!(context instanceof Context)) {
         throw new TypeError("needs a 'context' argument.");
     }
-
+    
     var iframe = document.createElement('iframe');
     if (!iframe.style) iframe.style = {};
     iframe.style.display = 'none';
-
+    
     document.body.appendChild(iframe);
-
+    
     var win = iframe.contentWindow;
     var wEval = win.eval, wExecScript = win.execScript;
 
@@ -81589,7 +81581,7 @@ Script.prototype.runInContext = function (context) {
         wExecScript.call(win, 'null');
         wEval = win.eval;
     }
-
+    
     forEach(Object_keys(context), function (key) {
         win[key] = context[key];
     });
@@ -81598,11 +81590,11 @@ Script.prototype.runInContext = function (context) {
             win[key] = context[key];
         }
     });
-
+    
     var winKeys = Object_keys(win);
 
     var res = wEval.call(win, this.code);
-
+    
     forEach(Object_keys(win), function (key) {
         // Avoid copying circular objects like `top` and `window` by only
         // updating existing context properties or new properties in the `win`
@@ -81617,9 +81609,9 @@ Script.prototype.runInContext = function (context) {
             defineProp(context, key, win[key]);
         }
     });
-
+    
     document.body.removeChild(iframe);
-
+    
     return res;
 };
 

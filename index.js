@@ -93,6 +93,17 @@ LiquiumMobileLib.prototype.setDelegates = function(organizationAddr, categoryIds
     this.sendRawTransaction(organizationAddr, data, cb);
 };
 
+LiquiumMobileLib.prototype.getAllInfo = function(organizationAddr, cb) {
+    request({
+        url: hostApi+"/organization/"+organizationAddr+"?voter="+this.account
+    }, function(err, result, body) {
+        if (err) return cb(err);
+        if (result.statusCode != 200) return cb(new Error(body));
+        cb(null, body);
+    });
+};
+
+
 
 
 window.liquiumMobileLib = new LiquiumMobileLib();
